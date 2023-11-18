@@ -1,0 +1,2 @@
+# things that should never be included in the Docker build context
+**/.venv
