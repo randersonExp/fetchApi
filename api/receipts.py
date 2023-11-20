@@ -1,5 +1,5 @@
 """
-This file contains all routes related to processing receipts.
+This file contains all API routes related to processing receipts.
 """
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel

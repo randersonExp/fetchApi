@@ -160,7 +160,7 @@ class Receipt(BaseModel):
         await asyncio.sleep(.4) # sleeping to simulate the time it takes to write to a db
         points = self.calculate_points(receipt=receipt)
         receiptId = getUuidStr()
-        print("points!!!!!!!!!", points) # For debugging -- remove
+        # print("points!!!!!!!!!", points) # For debugging -- remove
         # TODO: In a real-world app, we would probably save the receipt's metadata. For this exercise, I
         # will just save the points.
         pointsDatabase[receiptId] = points
