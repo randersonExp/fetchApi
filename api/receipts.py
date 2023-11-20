@@ -15,9 +15,7 @@ class GetPointsResponse(BaseModel):
     points: int # Ex: 100
 
 class PostReceiptsResponse(BaseModel):
-    # Note: Python 3's ints are "unlimited" in size, so this satisfies the 64 bit requirement. 
-    # However, we could always put an additional validator, (or custom typing), around this if desired.
-    id: str
+    id: UUIDStr
 
 @receiptsRouter.get("/{id}/points")
 async def getPoints(id: UUIDStr) -> GetPointsResponse:
@@ -43,12 +41,14 @@ async def getPoints(id: UUIDStr) -> GetPointsResponse:
 async def getPoints(receiptRaw: dict) -> PostReceiptsResponse:
     """
     Submits a receipt for processing
-    
-    TODO: use class method for this!
+
+    TODO: Add authentication.
+    TODO: If this API is customer-facing, then we should NOT return a response if the receipt id is tied to another 
+    user's account.
     """
     try:
         receipt = Receipt(**receiptRaw)
-    except:
+    except Exception as e:
         # TODO - in a prod env we would log the specific error here for debugging purposes.
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

@@ -1,19 +1,29 @@
 """
 This file contains the models and corresponding business logic for processing and fetching receipts.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import List, Union
 from datetime import datetime
 import math
 
-from fetchApi.models.common import getUuidStr, UUIDStr
+from fetchApi.models.common import getUuidStr, UUIDStr, validate_custom_regex, validate_float_total
 
 # An in-memory key-value store to simulate a database. Note: We would not do this in a prod-ready app :)
 pointsDatabase = dict()
 
 class Item(BaseModel):
-    shortDescription: str # @@ pattern: pattern: ^[\w\s\-]+$
-    price: str # @@ Ex: "6.49", should follow pattern: ^\d+\.\d{2}$
+  shortDescription: str # pattern: ^[\w\s\-]+$
+  price: str # Ex: "6.49", should follow pattern: ^\d+\.\d{2}$
+
+  @validator('price')
+  def validate_total(cls, v):
+    validate_float_total(v)
+    return v
+  
+  @validator('shortDescription')
+  def validate_description(cls, v):
+    validate_custom_regex("^[\w\s\-]+$", v)
+    return v
 
 class Receipt(BaseModel):
     """
@@ -46,11 +56,38 @@ class Receipt(BaseModel):
     This should generate 28 points.
     """
     retailer: str
-    purchaseDate: str # @@ should be a date YYYY-MM-DD like so: "2022-01-01"
-    purchaseTime: str # @@ should be time lie HH:MM ex: "13:01"
+    purchaseDate: str # Should be a date YYYY-MM-DD like so: "2022-01-01"
+    purchaseTime: str # should be time lie HH:MM ex: "13:01"
     items: List[Item]
-    total: str # @@ Ex: "6.49", should follow pattern: ^\d+\.\d{2}$
+    total: str # Ex: "6.49", should follow pattern: ^\d+\.\d{2}$
 
+    @validator('retailer')
+    def validate_retailer_name(cls, v):
+      if not v or not v.strip() or v[0].isspace():  # Check if the string is empty or starts with whitespace
+          raise ValueError('Invalid retailer name')
+      return v
+
+    @validator('purchaseDate')
+    def validate_date_format(cls, v):
+      try:
+          datetime.strptime(v, '%Y-%m-%d')
+      except ValueError:
+          raise ValueError('Incorrect date format, should be YYYY-MM-DD')
+      return v
+
+    @validator('purchaseTime')
+    def validate_date_format(cls, v):
+      try:
+        datetime.strptime(v, '%H:%M')
+      except ValueError:
+        raise ValueError('Incorrect time format, should be HH:MM')
+      return v    
+    
+    @validator('total')
+    def validate_total(cls, v):
+      validate_float_total(v)
+      return v
+  
     @classmethod
     def calculate_points(self, receipt: 'Receipt') -> int:
         """
@@ -76,7 +113,6 @@ class Receipt(BaseModel):
             return number == int(number)
         
         # convert obj to dict for easy processing.
-        print("receipt", receipt) # @@ rm
         points = 0
 
         # Rule 1: One point for every alphanumeric character in the retailer name.
@@ -104,7 +140,7 @@ class Receipt(BaseModel):
 
         # Rule 6: 6 points if the day in the purchase date is odd.
         purchase_date = datetime.strptime(receipt['purchaseDate'], '%Y-%m-%d')
-        if purchase_date.day % 2 != 0: # @@ double check this
+        if purchase_date.day % 2 != 0:
             points += 6
 
         # Rule 7: 10 points if the time of purchase is after 2:00pm and before 4:00pm.
@@ -122,7 +158,7 @@ class Receipt(BaseModel):
         """
         points = self.calculate_points(receipt=receipt)
         receiptId = getUuidStr()
-        print("points!!!!!!!!!", points) # @@
+        print("points!!!!!!!!!", points) # For debugging -- remove
         # TODO: In a real-world app, we would probably save the receipt's metadata. For this exercise, I
         # will just save the points.
         pointsDatabase[receiptId] = points
