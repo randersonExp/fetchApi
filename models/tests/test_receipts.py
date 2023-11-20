@@ -59,9 +59,9 @@ class TestSuite(unittest.IsolatedAsyncioTestCase):
         Tests receipt insertion and retrieval. 
         """
         mockReceipt = get_mock_receipt(TEST_RECEIPT_ONE)
-        receiptId = Receipt.postReceipt(receipt=mockReceipt.dict())
+        receiptId = await Receipt.postReceipt(receipt=mockReceipt.dict())
         assert len(receiptId) > 0, "postReceipt() should return a receiptId!"
-        pointsEarned = Receipt.getReceipt(receiptId=receiptId)
+        pointsEarned = await Receipt.getReceipt(receiptId=receiptId)
         assert isinstance(pointsEarned, int) and pointsEarned > 0, "We should be able to fetch receipt points after posting"
 
     async def test_point_calculation(self):

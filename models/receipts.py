@@ -1,6 +1,7 @@
 """
 This file contains the models and corresponding business logic for processing and fetching receipts.
 """
+import asyncio
 from pydantic import BaseModel, validator
 from typing import List, Union
 from datetime import datetime
@@ -151,11 +152,12 @@ class Receipt(BaseModel):
         return points
 
     @classmethod
-    def postReceipt(self, receipt: 'Receipt') -> UUIDStr:
+    async def postReceipt(self, receipt: 'Receipt') -> UUIDStr:
         """
         Helper function for calculating and storing the points associated with a single receipt.
         After processing, this function returns a unique id.
         """
+        await asyncio.sleep(.4) # sleeping to simulate the time it takes to write to a db
         points = self.calculate_points(receipt=receipt)
         receiptId = getUuidStr()
         print("points!!!!!!!!!", points) # For debugging -- remove
@@ -165,8 +167,9 @@ class Receipt(BaseModel):
         return receiptId
     
     @staticmethod
-    def getReceipt(receiptId: UUIDStr) -> Union[int, None]:
+    async def getReceipt(receiptId: UUIDStr) -> Union[int, None]:
         """
         fetches a single receipt's points by receipt ID (a UUID4). We return None if the receipt DNE.
         """
+        await asyncio.sleep(.3) # sleeping to simulate the time it takes to read from a db
         return pointsDatabase.get(receiptId)

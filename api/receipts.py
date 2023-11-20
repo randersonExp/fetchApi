@@ -28,7 +28,7 @@ async def getPoints(id: UUIDStr) -> GetPointsResponse:
     TODO: if 'id' is a string like, "adb6b560-0eef-42bc-9d16-df48f30e89b2", then we can probably do a pattern match
     on this value to detect invalid ids.
     """
-    points = Receipt.getReceipt(receiptId=id)
+    points = await Receipt.getReceipt(receiptId=id)
     # Handle the "not found" case here.
     if points is None:
         raise HTTPException(
@@ -54,5 +54,5 @@ async def getPoints(receiptRaw: dict) -> PostReceiptsResponse:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The receipt is invalid"
         )
-    receiptUUID = Receipt.postReceipt(receipt=receipt.dict())
+    receiptUUID = await Receipt.postReceipt(receipt=receipt.dict())
     return PostReceiptsResponse(id=receiptUUID)
