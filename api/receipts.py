@@ -1,7 +1,7 @@
 """
 This file contains all routes related to processing receipts.
 """
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 from fetchApi.models.receipts import Receipt
@@ -22,7 +22,7 @@ class PostReceiptsResponse(BaseModel):
 @receiptsRouter.get("/{id}/points")
 async def getPoints(id: UUIDStr) -> GetPointsResponse:
     """
-    Fetches points for a given receipt.
+    Fetches points for a given receipt id.
 
     TODO: Add authentication.
     TODO: If this API is customer-facing, then we should NOT return a response if the receipt id is tied to another 
@@ -31,17 +31,28 @@ async def getPoints(id: UUIDStr) -> GetPointsResponse:
     on this value to detect invalid ids.
     """
     points = Receipt.getReceipt(receiptId=id)
+    # Handle the "not found" case here.
     if points is None:
-        return # TODO -- error case
-    else:
-        return GetPointsResponse(points=points)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No receipt found for that id"
+        )
+    return GetPointsResponse(points=points)
     
 @receiptsRouter.post("/process")
-async def getPoints(receipt: Receipt) -> PostReceiptsResponse:
+async def getPoints(receiptRaw: dict) -> PostReceiptsResponse:
     """
     Submits a receipt for processing
     
     TODO: use class method for this!
     """
+    try:
+        receipt = Receipt(**receiptRaw)
+    except:
+        # TODO - in a prod env we would log the specific error here for debugging purposes.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The receipt is invalid"
+        )
     receiptUUID = Receipt.postReceipt(receipt=receipt.dict())
     return PostReceiptsResponse(id=receiptUUID)
