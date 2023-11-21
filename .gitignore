@@ -26,10 +26,7 @@ mprofile_*
 *.pkl
 *.dill
 *.xslx
-magellan/package-lock.json
 utils/package-lock.json
-gather_links/package-lock.json
-download_pages/package-lock.json
 
 .coverage
 cover
