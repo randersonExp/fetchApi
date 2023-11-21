@@ -2,7 +2,7 @@
 Insert description here
 
 # Running the Project via Docker Container
-1. cd into the `/api` folder `cd api/`
+1. Make sure you are at the root level of the `fetchApi` repository, since that is where our Dockerfile exists!
 2. Build the image locally and give it the tag `fetchapi` like so:
 ```
 docker build -t fetchapi .
