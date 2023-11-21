@@ -37,5 +37,25 @@ pip install -r api/requirements.txt
 4. Run the FastAPI web server with the following command: `uvicorn api.main:createApp --reload`
 5. To test it, the directions are the same as they were when building via the Docker image! A liveliness check is exposed and can be accessed at the following URL: `http://127.0.0.1:8000/`
 
+# Running Unit Tests
+Note: If you want to run tests, then read the 'Local Development' section first.
+1. For testing the API routes:
+```
+python -m unittest api/tests/test_*.py
+```
+
+2. For testing our models:
+```
+python -m unittest models/tests/test_*.py
+```
+
+
+# TODOs
+1. "Productionize" the Dockerfile better and build off of an Ubuntu base image.
+2. Switch to a more robust package management solution instead of just a `requirements.txt` file. I typically use Poetry for Python apps.
+3. Address the TODOs in the codebase. These are very descriptive! One concern is that our API doesn't yet have a detection mechanism for duplicate receipts. :)
+4. Set up CICD through GH Actions.  Our CICD pipeline should always run our unit tests!
+5. Set up reusable middleware for handling errors in our API (among other things).
+
 
 
